@@ -34,9 +34,10 @@ public class MainActivity extends AppCompatActivity {
     private static String TAG = "mysqltest_MainActivity";
 
     private static final String TAG_JSON="webnautes";
-    private static final String TAG_ID = "ID";
+    private static final String TAG_ID = "Id";
+    private static final String TAG_PW = "Password";
     private static final String TAG_NAME = "Name";
-    private static final String TAG_POPULATION ="Population";
+    private static final String TAG_AGE ="Age";
 
     private TextView mTextViewResult;
     ArrayList<HashMap<String, String>> mArrayList;
@@ -160,22 +161,24 @@ public class MainActivity extends AppCompatActivity {
                 JSONObject item = jsonArray.getJSONObject(i);
 
                 String id = item.getString(TAG_ID);
+                String pw = item.getString(TAG_PW);
                 String name = item.getString(TAG_NAME);
-                String address = item.getString(TAG_POPULATION);
+                String age = item.getString(TAG_AGE);
 
                 HashMap<String,String> hashMap = new HashMap<>();
 
                 hashMap.put(TAG_ID, id);
+                hashMap.put(TAG_PW, pw);
                 hashMap.put(TAG_NAME, name);
-                hashMap.put(TAG_POPULATION, address);
+                hashMap.put(TAG_AGE, age);
 
                 mArrayList.add(hashMap);
             }
 
             ListAdapter adapter = new SimpleAdapter(
                     MainActivity.this, mArrayList, R.layout.item_list,
-                    new String[]{TAG_ID,TAG_NAME, TAG_POPULATION},
-                    new int[]{R.id.textView_list_id, R.id.textView_list_name, R.id.textView_list_address}
+                    new String[]{TAG_ID,TAG_PW,TAG_NAME,TAG_AGE},
+                    new int[]{R.id.textView_list_id, R.id.textView_list_pw,R.id.textView_list_name, R.id.textView_list_age}
             );
 
             mlistView.setAdapter(adapter);
