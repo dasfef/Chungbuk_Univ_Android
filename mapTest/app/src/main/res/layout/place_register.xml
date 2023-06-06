@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="20dp"
+    android:gravity="center"
+    android:orientation="vertical">
+    <TextView
+        android:id="@+id/registerTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:text="Place Register"
+        android:textSize="25dp"
+        android:layout_marginBottom="20dp"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <EditText
+            android:id="@+id/regPName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="장소명"/>
+        <EditText
+            android:id="@+id/regPAddr"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="주소"/>
+        <EditText
+            android:id="@+id/regPReview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="한줄평"/>
+
+    </LinearLayout>
+    <Button
+        android:id="@+id/btnPReg"
+        android:layout_marginTop="30dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="등록"/>
+    <TextView
+        android:id="@+id/tv_result"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+
+</LinearLayout>

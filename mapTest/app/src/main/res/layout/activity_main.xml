@@ -17,20 +17,15 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
         <Button
-            android:id="@+id/btnmark1"
+            android:id="@+id/btnAdd"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="마커1"/>
+            android:text="추가하기"/>
         <Button
-            android:id="@+id/btnmark2"
+            android:id="@+id/btnDel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="마커2"/>
-        <Button
-            android:id="@+id/btnmark3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="마커3"/>
+            android:text="제거하기"/>
     </LinearLayout>
 
     <com.naver.maps.map.MapView

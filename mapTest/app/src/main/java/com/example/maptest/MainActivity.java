@@ -3,19 +3,21 @@ package com.example.maptest;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.graphics.PointF;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.naver.maps.geometry.LatLng;
 import com.naver.maps.map.CameraPosition;
-import com.naver.maps.map.CameraUpdate;
 import com.naver.maps.map.MapView;
 import com.naver.maps.map.NaverMap;
 import com.naver.maps.map.OnMapReadyCallback;
+import com.naver.maps.map.overlay.InfoWindow;
 import com.naver.maps.map.overlay.Marker;
 import com.naver.maps.map.overlay.Overlay;
 import com.naver.maps.map.overlay.OverlayImage;
@@ -26,12 +28,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private MapView mapView;
     private static NaverMap naverMap;
-
-    //마커 변수 선언 및 초기화
-    private Marker marker1 = new Marker();
-    private Marker marker2 = new Marker();
-    private Marker marker3 = new Marker();
     private ArrayList<Marker> markerList = new ArrayList<>();
+    private Marker markerPath = new Marker();
+    private ArrayList<Double> latitude = new ArrayList<>();
+    private ArrayList<Double> longitude = new ArrayList<>();
+    double latitudePath = 0;
+    double longitudePath = 0;
+    private ArrayList<InfoWindow> infoList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,79 +46,101 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
 
-        Button btnMark1 = (Button) findViewById(R.id.btnmark1);
-        Button btnMark2 = (Button) findViewById(R.id.btnmark2);
-        Button btnMark3 = (Button) findViewById(R.id.btnmark3);
+        Button btnAdd = (Button) findViewById(R.id.btnAdd);
+        Button btnDel = (Button) findViewById(R.id.btnDel);
 
-        btnMark1.setOnClickListener(new View.OnClickListener() {
+        btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setMark(marker1, 36.7288, 127.4339, R.drawable.baseline_place_24, 0);
-                marker1.setOnClickListener(new Overlay.OnClickListener() {
-                    @Override
-                    public boolean onClick(@NonNull Overlay overlay) {
-                        Toast.makeText(getApplicationContext(), "마커 1이 클릭되었습니다", Toast.LENGTH_SHORT).show();
-                        return false;
-                    }
-                });
+                Intent intent = new Intent(getApplicationContext(), DialogActivity.class);
+                startActivity(intent);
+
+                SharedData sharedData = SharedData.getInstance();
+                Marker marker = new Marker();
+                InfoWindow infoWindow = new InfoWindow();
+
+                markerList.add(marker);
+                infoList.add(infoWindow);
+                latitude.add(latitudePath);
+                longitude.add(longitudePath);
+
+                setMark(marker, latitude.get(latitude.size()-1), longitude.get(longitude.size()-1), R.drawable.baseline_place_24, 0);
+                for(int i=0; i<markerList.size(); i++){
+                    int finalI = i;
+
+                    markerList.get(i).setOnClickListener(new Overlay.OnClickListener() {
+                        @Override
+                        public boolean onClick(@NonNull Overlay overlay) {
+                            Toast.makeText(getApplicationContext(), finalI +"번 마커 클릭되었습니다", Toast.LENGTH_SHORT).show();
+
+                            Intent intent = getIntent();
+                            String name = intent.getStringExtra("EditName");
+                            String addr = intent.getStringExtra("EditAddr");
+                            String content = intent.getStringExtra("EditContent");
+
+                            ViewGroup rootView = (ViewGroup) findViewById(R.id.map_view);
+                            pointAdapter adapter = new pointAdapter(MainActivity.this, rootView, name, addr, content);
+
+                            infoList.get(finalI).setAdapter(adapter);
+                            infoList.get(finalI).setZIndex(100);
+                            infoList.get(finalI).setAlpha(0.9f);
+
+                            if(markerList.get(finalI).getInfoWindow() == null) {
+                                infoList.get(finalI).open(markerList.get(finalI));
+                            } else {
+                                infoList.get(finalI).close();
+                            }
+
+
+                            btnDel.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    Toast.makeText(getApplicationContext(), finalI + "번 마커 제거되었습니다", Toast.LENGTH_SHORT).show();
+                                    delMark(markerList.get(finalI), infoList.get(finalI));
+                                }
+                            });
+                            return false;
+                        }
+
+                    });
+                }
             }
         });
+    }
 
-        btnMark2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                setMark(marker2, 36.6678, 127.4787, R.drawable.baseline_place_24, 0);
-                marker2.setOnClickListener(new Overlay.OnClickListener() {
-                    @Override
-                    public boolean onClick(@NonNull Overlay overlay) {
-                        Toast.makeText(getApplicationContext(), "여긴 우리집", Toast.LENGTH_SHORT).show();
-                        return false;
-                    }
-                });
-            }
-        });
-
-        btnMark3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                setMark(marker3, 36.63473,  127.48801, R.drawable.baseline_place_24, 0);
-                marker3.setOnClickListener(new Overlay.OnClickListener() {
-                    @Override
-                    public boolean onClick(@NonNull Overlay overlay) {
-                        Toast.makeText(getApplicationContext(), "여긴 시청입니다", Toast.LENGTH_SHORT).show();
-                        return false;
-                    }
-                });
-            }
-        });
-
-
-
-
+    private void delMark(Marker marker, InfoWindow info){
+        marker.setMap(null);
+        markerList.remove(marker);
+        infoList.remove(info);
     }
 
     @Override
     public void onMapReady(@NonNull NaverMap naverMap)
     {
         this.naverMap = naverMap;
-
         CameraPosition cameraPosition = new CameraPosition(
                 new LatLng(36.72773, 127.43676),      // 위치 지정
-                14                                              // 줌 레벨
+                14                                                    // 줌 레벨
         );
         naverMap.setCameraPosition(cameraPosition);
         naverMap.setOnMapClickListener(new NaverMap.OnMapClickListener() {
             @Override
             public void onMapClick(@NonNull PointF pointF, @NonNull LatLng latLng) {
-                double latitude = latLng.latitude;
-                double longitude = latLng.longitude;
-//                CameraUpdate cameraUpdate = CameraUpdate.scrollTo(new LatLng(latitude, longitude));
-//                naverMap.moveCamera(cameraUpdate);
 
-                Marker marker = new Marker();
-                setMark(marker, latitude, longitude, R.drawable.baseline_place_24, 0);
+                latitudePath = latLng.latitude;
+                longitudePath = latLng.longitude;
+
+                // 카메라 움직이기
+                // CameraUpdate cameraUpdate = CameraUpdate.scrollTo(new LatLng(latitude, longitude));
+                // naverMap.moveCamera(cameraUpdate);
+
+                markerPath.setPosition(new LatLng(latitudePath,longitudePath));
+                markerPath.setIcon(OverlayImage.fromResource(R.drawable.baseline_place_24));
+                markerPath.setMap(naverMap);
+
             }
         });
+
     }
 
     private void setMark(Marker marker, double lat, double lng, int resourceID, int zIndex)
@@ -132,7 +157,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         marker.setZIndex(zIndex);
         //마커 표시
         marker.setMap(naverMap);
-        markerList.add(marker);
+
     }
 
     @Override
