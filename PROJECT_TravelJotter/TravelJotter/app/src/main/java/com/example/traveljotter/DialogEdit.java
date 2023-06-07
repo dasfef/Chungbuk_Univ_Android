@@ -68,7 +68,7 @@ public class DialogEdit extends AppCompatActivity {
                 mEditTextAddr.setText("");
                 mEditTextReview.setText("");
 
-//                finish();
+                finish();
             }
         });
 
